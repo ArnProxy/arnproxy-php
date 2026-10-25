@@ -1,0 +1,16 @@
+{
+  "name": "arnproxy/arnproxy-php",
+  "description": "ARNPROXY customer API client",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": ">=8.1",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "files": [
+      "php/Arnproxy.php"
+    ]
+  }
+}
