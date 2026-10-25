@@ -3,6 +3,16 @@ declare(strict_types=1);
 require $argv[1].'/php/Arnproxy.php';
 use ArnproxySdk\{Client,ArnproxyError};
 $f=json_decode(file_get_contents($argv[2]),true,32,JSON_THROW_ON_ERROR);$resources=json_decode(file_get_contents($argv[1].'/resources.json'),true)['resources'];$checks=0;
+// Public synthetic fixtures, never production signing secrets.
+foreach($f['vectors'] as &$vector){
+    if(isset($vector['secret_fixture'])){
+        $tag=$vector['secret_fixture'];
+        if(!in_array($tag,['repeat_X_32','repeat_Y_32'],true))throw new RuntimeException('INVALID_TEST_FIXTURE');
+        $vector['secret']='whsec_'.base64_encode(str_repeat($tag==='repeat_X_32'?'X':'Y',32));
+    }
+}
+unset($vector);
+
 function ck(bool$v):void{global$checks;if(!$v)throw new RuntimeException('ASSERT_'.$checks);$checks++;}
 function err(callable$c,string$code):ArnproxyError{global$f;try{$c();throw new RuntimeException('NO_ERROR');}catch(ArnproxyError$e){ck($e->error_code===$code);ck(!str_contains($e->getMessage(),$f['key']));return$e;}}
 class MockClient extends Client{public array $calls=[];public int $status=200;public array $received=[];public string $raw;public bool $failure=false;public function __construct(array$o=[]){global$f;parent::__construct($f['key'],$o);$this->raw=json_encode($f['body']);}protected function send(string$m,string$u,array$h,?string$b):array{$this->calls[]=[$m,$u,$h,$b];if($this->failure)throw new RuntimeException('sensitive transport detail');return[$this->status,$this->received,$this->raw];}}

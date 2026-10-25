@@ -1,6 +1,6 @@
 # ARNPROXY SDK for PHP
 
-Version **1.1.0** · MIT · PHP 8.1+ with cURL.
+Version **1.1.1** · MIT · PHP 8.1+ with cURL.
 
 Source client for https://www.arnproxy.com/account/api/v1/ . Covers all **77 documented resources** through a generic request method, plus account/capabilities convenience methods and webhook HMAC verification. This client is for ARNPROXY, not a direct connection to an upstream provider.
 
@@ -45,3 +45,5 @@ MIT, copyright 2026 ARNPROXY. The license covers this SDK only, not the hosted p
 `php -n tests/run.php . tests/fixtures.json`
 
 Uses synthetic fixtures and mocked transports only. No real API key or hosted API call is required. GitHub Actions runs this check on pushes and pull requests.
+
+Public synthetic test-key recipes are documented in [TESTING.md](TESTING.md). Never use them with a live service.

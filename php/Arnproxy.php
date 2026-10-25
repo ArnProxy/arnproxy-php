@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace ArnproxySdk;
 
-/** Thin client 1.1.0. No redirects, retries, automatic polling or logging. PHP 8.1+ with cURL. */
+/** Thin client 1.1.1. No redirects, retries, automatic polling or logging. PHP 8.1+ with cURL. */
 final class ArnproxyError extends \RuntimeException
 {
     public function __construct(public readonly string $error_code,public readonly ?int $http_status=null,public readonly ?string $request_id=null,public readonly ?int $retry_after=null,public readonly bool $uncertain=false){parent::__construct($error_code);}
@@ -33,7 +33,7 @@ class Client
         if(($params&&array_is_list($params))||array_filter(array_keys($params),static fn($k)=>!is_string($k))||array_key_exists('resource',$params))throw new ArnproxyError('INVALID_PARAMETERS');
         if($spec['disabled'])throw new ArnproxyError('DISABLED_RESOURCE');$write=$spec['write'];
         if($write&&!$this->allowWrites)throw new ArnproxyError('WRITES_DISABLED');if($spec['provider_read']&&!$this->allowProviderReads)throw new ArnproxyError('PROVIDER_READS_DISABLED');
-        $headers=['Authorization: Bearer '.$this->key,'Accept: application/json','User-Agent: ARNPROXY-PHP/1.1.0'];
+        $headers=['Authorization: Bearer '.$this->key,'Accept: application/json','User-Agent: ARNPROXY-PHP/1.1.1'];
         if($spec['idempotency']){if($operation_key===null||preg_match('/^[A-Za-z0-9_-]{16,100}$/D',$operation_key)!==1)throw new ArnproxyError('OPERATION_KEY_REQUIRED');$headers[]='Idempotency-Key: '.$operation_key;}elseif($operation_key!==null)throw new ArnproxyError('UNEXPECTED_OPERATION_KEY');
         $path=$spec['path'];if(str_contains($path,'{id}')){$id=$params['id']??null;if(!is_string($id)&&!is_int($id)||preg_match('/^[1-9][0-9]{0,9}$/D',(string)$id)!==1||(int)$id>2147483647)throw new ArnproxyError('INVALID_ROUTE_ID');$path=str_replace('{id}',(string)$id,$path);unset($params['id']);}
         $body=null;if($spec['method']==='GET'){$query=[];foreach($params as$k=>$v){if(!is_string($v)&&!is_int($v)&&!is_bool($v))throw new ArnproxyError('INVALID_QUERY_VALUE');$query[$k]=is_bool($v)?($v?'1':'0'):(string)$v;}if($query)$path.='?'.http_build_query($query,'','&',PHP_QUERY_RFC3986);}else{try{$body=json_encode((object)$params,JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE,32);}catch(\Throwable){throw new ArnproxyError('INVALID_JSON_BODY');}if(strlen($body)>self::MAX)throw new ArnproxyError('REQUEST_TOO_LARGE');$headers[]='Content-Type: application/json';}

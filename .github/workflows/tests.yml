@@ -1,0 +1,16 @@
+name: SDK offline checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl
+      - name: Synthetic contract and webhook tests
+        run: php -n tests/run.php . tests/fixtures.json
